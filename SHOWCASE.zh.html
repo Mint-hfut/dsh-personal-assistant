@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>dsh-personal-assistant · 领导演示</title>
+  <style>
+    :root {
+      --bg: #071018;
+      --bg-soft: #0b1722;
+      --panel: rgba(16, 31, 44, .76);
+      --panel-2: rgba(21, 40, 56, .92);
+      --line: rgba(166, 205, 229, .14);
+      --text: #f4f8fb;
+      --muted: #a9bdcb;
+      --blue: #72a7ff;
+      --cyan: #63dfd2;
+      --gold: #f4c96b;
+      --purple: #af8cff;
+      --green: #72dda5;
+      --red: #ff8585;
+      --shadow: 0 30px 80px rgba(0, 0, 0, .38);
+      --radius: 24px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 8%, rgba(82, 139, 255, .18), transparent 28rem),
+        radial-gradient(circle at 85% 24%, rgba(99, 223, 210, .11), transparent 28rem),
+        radial-gradient(circle at 50% 92%, rgba(175, 140, 255, .11), transparent 30rem),
+        var(--bg);
+      font-family: "Times New Roman", "Songti SC", SimSun, "Noto Serif CJK SC", serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; text-decoration: none; }
+    ::selection { background: rgba(114, 167, 255, .35); }
+    .noise {
+      position: fixed; inset: 0; pointer-events: none; opacity: .28; z-index: -1;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.06'/%3E%3C/svg%3E");
+    }
+    .wrap { width: min(1200px, calc(100% - 40px)); margin: 0 auto; }
+    .nav {
+      position: sticky; top: 0; z-index: 20;
+      border-bottom: 1px solid transparent;
+      background: rgba(7, 16, 24, .68);
+      backdrop-filter: blur(22px);
+      transition: .25s ease;
+    }
+    .nav.scrolled { border-color: var(--line); background: rgba(7, 16, 24, .9); }
+    .nav-inner { height: 68px; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 760; letter-spacing: -.02em; }
+    .brand-mark { width: 34px; height: 34px; filter: drop-shadow(0 10px 18px rgba(91, 140, 255, .32)); }
+    .brand small { color: var(--muted); font-weight: 500; margin-left: 5px; }
+    .nav-links { display: flex; gap: 18px; align-items: center; color: var(--muted); font-size: 14px; }
+    .nav-links a:hover { color: var(--text); }
+    .btn {
+      border: 1px solid var(--line); border-radius: 999px; padding: 10px 17px; cursor: pointer;
+      background: rgba(255,255,255,.04); transition: transform .2s ease, border-color .2s ease, background .2s ease;
+    }
+    .btn:hover { transform: translateY(-2px); border-color: rgba(114,167,255,.55); background: rgba(114,167,255,.09); }
+    .btn:active { transform: translateY(0) scale(.98); }
+    :where(a,button):focus-visible { outline: 3px solid #b7d1ff; outline-offset: 3px; box-shadow: 0 0 0 5px rgba(114,167,255,.18); }
+    button:disabled { cursor: not-allowed; opacity: .62; }
+    .btn.primary { color: #06111a; border: 0; background: linear-gradient(135deg, #8ab7ff, #69e6d8); font-weight: 760; box-shadow: 0 12px 35px rgba(99,223,210,.18); }
+    .btn.primary:hover { background: linear-gradient(135deg, #9ec4ff, #7ceadd); }
+    .hero { min-height: 760px; display: grid; grid-template-columns: 1.07fr .93fr; gap: 58px; align-items: center; padding: 80px 0 72px; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; color: var(--cyan); font-size: 13px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; }
+    .eyebrow::before { content: ""; width: 24px; height: 1px; background: currentColor; }
+    h1 { margin: 18px 0 22px; font-size: clamp(48px, 6vw, 82px); line-height: 1.04; letter-spacing: -.055em; }
+    .gradient-text { background: linear-gradient(90deg, #f6fbff 10%, #8db9ff 52%, #6fe1d6 94%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero-copy { max-width: 680px; font-size: 19px; color: #c0d0da; }
+    .hero-copy strong { color: var(--text); }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+    .trust-row { display: flex; gap: 21px; flex-wrap: wrap; margin-top: 32px; color: var(--muted); font-size: 13px; }
+    .trust-row span { display: flex; align-items: center; gap: 7px; }
+    .trust-row i { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 14px rgba(114,221,165,.7); }
+    .glass { background: linear-gradient(180deg, #102130 0%, #0d1a26 100%); border: 1px solid var(--line); box-shadow: var(--shadow); }
+    .assistant-card { position: relative; border-radius: 32px; padding: 22px; overflow: hidden; min-height: 520px; }
+    .assistant-card::before { content: ""; position: absolute; inset: -35% 20% 50% -20%; background: radial-gradient(circle, rgba(114,167,255,.27), transparent 68%); pointer-events:none; }
+    .window-bar { display: flex; align-items: center; justify-content: space-between; padding-bottom: 18px; border-bottom: 1px solid var(--line); position: relative; }
+    .dots { display: flex; gap: 6px; }.dots b{display:block;width:9px;height:9px;border-radius:50%;background:#344655}.dots b:first-child{background:#ff8585}.dots b:nth-child(2){background:#f4c96b}.dots b:nth-child(3){background:#72dda5}
+    .status { color: var(--green); font-size: 12px; font-weight: 700; display: flex; align-items:center; gap:6px; }
+    .status::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 1.8s infinite}
+    @keyframes pulse { 50% { box-shadow:0 0 0 7px rgba(114,221,165,0); } 0%,100%{box-shadow:0 0 0 0 rgba(114,221,165,.35)} }
+    .chat { padding: 24px 2px 0; position: relative; }
+    .bubble { max-width: 88%; border-radius: 18px; padding: 13px 16px; margin-bottom: 14px; font-size: 14px; }
+    .bubble.user { margin-left: auto; background: linear-gradient(135deg, rgba(114,167,255,.24), rgba(175,140,255,.16)); border:1px solid rgba(114,167,255,.26); }
+    .bubble.agent { background: rgba(255,255,255,.045); border:1px solid var(--line); color:#d8e4ec; }
+    .mini-calls { display: grid; gap: 8px; margin: 18px 0; }
+    .call { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--line); border-radius:13px; background:rgba(6,14,21,.46); color:var(--muted); font:13px/1.3 "Cascadia Code",Consolas,monospace; transform:translateX(-8px); opacity:0; animation:callIn .42s forwards; }
+    .call:nth-child(2){animation-delay:.25s}.call:nth-child(3){animation-delay:.5s}.call:nth-child(4){animation-delay:.75s}.call:nth-child(5){animation-delay:1s}
+    .call::before{content:"✓";color:var(--green);font-weight:800}.call.wait::before{content:"◆";color:var(--gold)}
+    @keyframes callIn{to{transform:translateX(0);opacity:1}}
+    .approval { border-radius: 16px; border: 1px solid rgba(244,201,107,.3); background: rgba(244,201,107,.07); padding: 14px; display:flex; justify-content:space-between; gap:14px; align-items:center; color:#f7e4b4; font-size:13px; }
+    .approval b { display:block; color:var(--gold); font-size:13px; margin-bottom:2px; }
+    .approval .lock { width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(244,201,107,.12);font-size:17px;flex:0 0 auto; }
+    .metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:104px; }
+    .metric { border-radius:20px; padding:22px; min-height:132px; }
+    .metric strong { font-size:36px; letter-spacing:-.04em; display:block; }
+    .metric span { color:var(--muted); font-size:13px; }
+    section { scroll-margin-top: 88px; padding: 20px 0 100px; }
+    .section-head { display:flex; gap:36px; justify-content:space-between; align-items:end; margin-bottom:34px; }
+    .section-head h2 { margin:10px 0 0; font-size:clamp(34px,4vw,54px); letter-spacing:-.045em; line-height:1.08; }
+    .section-head p { max-width:500px; margin:0; color:var(--muted); }
+    .knowledge-spotlight { display:grid; grid-template-columns:1.08fr .92fr; gap:18px; }
+    .knowledge-main,.knowledge-meta { border-radius:26px; padding:28px; }
+    .knowledge-main h3,.knowledge-meta h3 { margin:0 0 8px; font-size:22px; }
+    .knowledge-main>p,.knowledge-meta>p { margin:0 0 20px; color:var(--muted); font-size:13px; }
+    .kind-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+    .kind-group h4 { margin:0 0 9px; color:var(--cyan); font-size:14px; }
+    .kind-group .kind-item + .kind-item { margin-top:9px; }
+    .kind-item { border:1px solid var(--line); border-radius:13px; padding:12px; background:rgba(5,13,20,.38); }
+    .kind-item strong { display:block; color:var(--text); font-size:13px; }
+    .kind-item span { display:block; color:var(--muted); font-size:13px; }
+    .kind-item small { display:block; color:#c8d6de; font-size:13px; margin-top:5px; }
+    .design-block { margin-bottom:18px; border-radius:26px; padding:28px; }
+    .design-block h3 { margin:0 0 10px; font-size:22px; }
+    .design-block > p { margin:0 0 18px; color:var(--muted); font-size:14px; }
+    .design-table-wrap { overflow-x:auto; }
+    .design-table { width:100%; border-collapse:collapse; font-size:14px; text-align:left; }
+    .design-table caption { text-align:left; color:var(--muted); padding-bottom:14px; font-size:13px; }
+    .design-table th,.design-table td { padding:14px 12px; border-bottom:1px solid var(--line); vertical-align:top; min-width:170px; }
+    .design-table thead th { color:var(--cyan); background:rgba(5,13,20,.35); }
+    .design-table tbody th { width:23%; font-weight:600; }
+    .design-table td { color:#c8d6de; }
+    .preference-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+    .design-note { color:var(--muted); font-size:13px; margin:16px 0 0; }
+    #memory .design-block { margin-top:18px; margin-bottom:0; }
+    .meta-stack { display:grid; gap:9px; }
+    .meta-row { display:grid; grid-template-columns:108px 1fr; gap:12px; padding:12px 13px; border:1px solid var(--line); border-radius:13px; background:rgba(5,13,20,.35); font-size:13px; }
+    .meta-row b { color:var(--cyan); }
+    .meta-row span { color:#c8d6de; }
+    .knowledge-lifecycle { margin-top:18px; border-radius:18px; padding:18px; display:grid; grid-template-columns:repeat(4,1fr); gap:9px; }
+    .life-step { border:1px solid var(--line); border-radius:13px; padding:12px; font-size:13px; color:#cbd8e0; background:rgba(5,13,20,.33); }
+    .life-step b { display:block; color:var(--blue); font:13px Consolas,monospace; margin-bottom:4px; }
+    .value-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; }
+    .value-card { border-radius:22px; padding:24px; min-height:225px; position:relative; overflow:hidden; transition:.25s ease; }
+    .value-card:hover { transform:translateY(-4px); border-color:rgba(114,167,255,.34); }
+    .value-card .icon { width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:rgba(114,167,255,.12);color:var(--blue);font-weight:800;margin-bottom:35px; }
+    .value-card h3 { margin:0 0 7px; font-size:19px; }.value-card p{margin:0;color:var(--muted);font-size:14px}
+    .demo-shell { border-radius:30px; overflow:hidden; display:grid; grid-template-columns:300px 1fr; min-height:610px; }
+    .step-list { padding:18px; background:rgba(5,13,20,.5); border-right:1px solid var(--line); }
+    .step { width:100%; text-align:left; border:0; background:transparent; border-radius:14px; padding:12px; margin:2px 0; cursor:pointer; display:grid; grid-template-columns:29px 1fr; gap:10px; color:var(--muted); transition:.2s; }
+    .step:hover { background:rgba(255,255,255,.04); color:var(--text); }
+    .step.active { background:linear-gradient(90deg,rgba(114,167,255,.16),rgba(99,223,210,.06)); color:var(--text); box-shadow:inset 3px 0 var(--blue); }
+    .step-index { width:26px;height:26px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;font-size:13px; }
+    .step.active .step-index { background:var(--blue); color:#06111a; border-color:transparent; font-weight:800; }
+    .step-title { font-size:13px; font-weight:700; display:block; }.step-tool{font-size:13px;color:#718a9a;display:block;margin-top:1px;font-family:Consolas,monospace}
+    .demo-stage { padding:34px; position:relative; display:flex; flex-direction:column; }
+    .demo-top { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:30px; }
+    .live-tag { font-size:13px;color:var(--cyan);display:flex;gap:7px;align-items:center; }.live-tag::before{content:"";width:8px;height:8px;background:var(--cyan);border-radius:50%;}
+    .progress { height:4px;background:rgba(255,255,255,.06);border-radius:3px;overflow:hidden;width:160px; }.progress span{display:block;height:100%;width:11%;background:linear-gradient(90deg,var(--blue),var(--cyan));transition:width .4s ease}
+    .stage-content { flex:1; display:flex; flex-direction:column; justify-content:center; animation:stageIn .34s ease; }
+    @keyframes stageIn{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+    .stage-kicker { color:var(--blue);font:600 12px/1.4 Consolas,monospace;letter-spacing:.04em;margin-bottom:12px; }
+    .stage-content h3 { font-size:33px;line-height:1.15;letter-spacing:-.035em;margin:0 0 14px; }
+    .stage-content > p { font-size:16px;color:var(--muted);max-width:690px;margin:0 0 26px; }
+    .stage-evidence { border:1px solid var(--line);border-radius:18px;padding:18px;background:rgba(5,13,20,.46); }
+    .stage-evidence header{display:flex;justify-content:space-between;color:#8298a7;font-size:13px;margin-bottom:12px;text-transform:uppercase;letter-spacing:.11em}
+    .evidence-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.evidence-item{padding:11px 12px;border-radius:11px;background:rgba(255,255,255,.035);font-size:13px;color:#d2dfe7}.evidence-item::before{content:"✓";color:var(--green);margin-right:8px}
+    .stage-actions { display:flex;justify-content:space-between;align-items:center;margin-top:28px;gap:12px; }.stage-actions small{color:#6f8796}
+    .tools-layout { display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start; }
+    .tool-nav { border-radius:22px;padding:12px;position:sticky;top:90px; }.tool-btn{width:100%;border:0;background:transparent;color:var(--muted);padding:12px;border-radius:12px;text-align:left;cursor:pointer;display:flex;justify-content:space-between;gap:10px}.tool-btn:hover,.tool-btn.active{background:rgba(114,167,255,.1);color:var(--text)}.tool-btn code{font-size:13px}.tool-btn span{font-size:13px;color:#718a9a}
+    .tool-detail { border-radius:24px;padding:32px;min-height:480px; }.tool-detail code{color:var(--cyan);font-size:13px}.tool-detail h3{font-size:32px;margin:10px 0;letter-spacing:-.03em}.tool-detail>p{color:var(--muted);max-width:700px}.action-chips{display:flex;gap:7px;flex-wrap:wrap;margin:22px 0}.chip{padding:6px 10px;border-radius:999px;border:1px solid var(--line);color:#c9d8e1;font:13px Consolas,monospace;background:rgba(255,255,255,.03)}
+    .tool-points{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;margin-top:28px}.tool-point{border:1px solid var(--line);border-radius:15px;padding:14px;color:#cedbe3;font-size:13px}.tool-point strong{display:block;color:var(--text);margin-bottom:3px}.tool-point span{color:var(--muted)}
+    .authority { display:grid;grid-template-columns:repeat(3,1fr);gap:14px;position:relative; }.authority-card{border-radius:22px;padding:24px;min-height:280px}.authority-card .top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.authority-card h3{margin:0;font-size:19px}.authority-card .badge{font-size:13px;border:1px solid var(--line);padding:4px 8px;border-radius:999px;color:var(--muted)}.authority-card ul{padding:0;margin:22px 0 0;list-style:none;display:grid;gap:9px;color:#c7d5de;font-size:13px}.authority-card li::before{content:"•";color:var(--cyan);margin-right:8px}.authority-card footer{margin-top:22px;color:#78909f;font-size:13px;border-top:1px solid var(--line);padding-top:13px}
+    .not-equal { text-align:center;color:var(--gold);font-size:13px;margin:18px 0 0; }
+    .favorite-lab { display:grid;grid-template-columns:1fr 1fr;gap:18px; }.fav-card,.knowledge-card{border-radius:24px;padding:26px;min-height:410px}.fav-card h3,.knowledge-card h3{margin:0 0 6px}.fav-card>p,.knowledge-card>p{margin:0 0 22px;color:var(--muted);font-size:13px}.fake-turn{border:1px solid var(--line);border-radius:16px;padding:16px;background:rgba(5,13,20,.45);font-size:13px;color:#d3e0e7}.fake-turn strong{color:var(--blue)}
+    .stars{display:flex;gap:5px;margin:18px 0}.star{border:0;background:transparent;color:#334754;font-size:28px;line-height:1;cursor:pointer;transition:.18s}.star:hover{transform:scale(1.13)}.star.on{color:var(--gold);filter:drop-shadow(0 0 8px rgba(244,201,107,.35))}
+    .categories{display:flex;flex-wrap:wrap;gap:7px}.cat{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:7px 11px;cursor:pointer;font-size:13px}.cat.on{background:rgba(114,167,255,.14);border-color:rgba(114,167,255,.5);color:var(--text)}
+    .parse-status{display:flex;gap:9px;align-items:center;margin:20px 0;color:var(--muted);font-size:13px}.parse-status i{display:block;width:9px;height:9px;border-radius:50%;background:#536978}.parse-status i.working{background:var(--gold);animation:pulse 1.4s infinite}.parse-status i.done{background:var(--green)}
+    .knowledge-output{border:1px solid var(--line);border-radius:16px;padding:17px;background:rgba(5,13,20,.47);opacity:.55;transition:.4s}.knowledge-output.done{opacity:1;border-color:rgba(114,221,165,.3)}.kv{display:grid;grid-template-columns:74px 1fr;gap:8px;margin:7px 0;font-size:13px}.kv span:first-child{color:#738b9b}.kv span:last-child{color:#dbe6ec}.beta-note{margin-top:17px;border-radius:13px;padding:12px 14px;background:rgba(244,201,107,.07);border:1px solid rgba(244,201,107,.2);color:#dbc68f;font-size:13px}
+    .control { border-radius:28px;overflow:hidden; }.tabs{display:flex;gap:4px;padding:12px;border-bottom:1px solid var(--line);background:rgba(5,13,20,.38);overflow:auto}.tab{border:0;background:transparent;color:var(--muted);padding:10px 15px;border-radius:11px;cursor:pointer;white-space:nowrap;font-size:13px}.tab.active{background:rgba(114,167,255,.13);color:var(--text)}.tab-panel{padding:26px;min-height:360px}.panel-title{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:18px}.panel-title h3{margin:0}.panel-title span{font-size:13px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:5px 9px}.mock-list{display:grid;gap:10px}.mock-row{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;border:1px solid var(--line);background:rgba(5,13,20,.38);border-radius:14px;padding:14px}.mock-row strong{display:block;font-size:13px}.mock-row small{color:var(--muted)}.row-badges{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.row-badge{font-size:13px;padding:4px 8px;border-radius:999px;background:rgba(114,167,255,.1);color:#a9c9ff}.row-badge.green{background:rgba(114,221,165,.1);color:#9ce7bf}.row-badge.gold{background:rgba(244,201,107,.1);color:#f1d792}
+    .orchestration { display:grid;grid-template-columns:300px 1fr;gap:18px }.scenario-box,.route-box{border-radius:24px;padding:24px}.scenario-btn{width:100%;border:1px solid transparent;background:transparent;color:var(--muted);border-radius:12px;padding:12px 13px;text-align:left;cursor:pointer;margin:3px 0}.scenario-btn.on{color:var(--text);border-color:var(--line);background:rgba(114,167,255,.09)}.route-track{display:flex;align-items:stretch;gap:8px;margin:28px 0;overflow:auto;padding-bottom:6px}.route-node{min-width:112px;padding:14px 12px;border-radius:15px;border:1px solid var(--line);background:rgba(5,13,20,.4);text-align:center;font-size:13px;position:relative}.route-node:not(:last-child)::after{content:"→";position:absolute;right:-14px;color:#5c7484}.route-node strong{display:block;color:var(--cyan);font:13px Consolas,monospace;margin-bottom:4px}.route-result{border-left:3px solid var(--green);padding:10px 14px;background:rgba(114,221,165,.06);color:#c7e6d5;font-size:13px;border-radius:0 10px 10px 0}
+    .safety-grid { display:grid;grid-template-columns:1fr 1fr;gap:16px }.safety-card{border-radius:22px;padding:25px}.safety-card h3{margin:0 0 16px;display:flex;gap:9px;align-items:center}.safety-card ul{list-style:none;padding:0;margin:0;display:grid;gap:10px;color:#cbd8e0;font-size:13px}.safety-card li{border-bottom:1px solid var(--line);padding-bottom:9px}.safety-card.safe h3{color:var(--green)}.safety-card.gate h3{color:var(--gold)}
+    .limits { display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:18px}.limit{border:1px solid var(--line);border-radius:15px;padding:14px;text-align:center;background:rgba(5,13,20,.35)}.limit b{font-size:22px;display:block}.limit span{font-size:13px;color:var(--muted)}
+    .close { border-radius:30px;padding:52px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:30px;background:linear-gradient(135deg,rgba(114,167,255,.15),rgba(99,223,210,.08)); }.close h2{font-size:42px;line-height:1.1;margin:0 0 13px;letter-spacing:-.04em}.close p{margin:0;color:var(--muted);max-width:720px}.close-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    footer.page-footer{padding:34px 0 48px;color:#6f8796;font-size:13px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}.source-links{display:flex;gap:14px}.source-links a:hover{color:var(--text)}
+    .toast { position:fixed;bottom:24px;left:50%;transform:translate(-50%,30px);opacity:0;z-index:50;background:#eaf6f3;color:#0c2420;border-radius:999px;padding:10px 16px;font-size:13px;font-weight:700;box-shadow:0 16px 50px rgba(0,0,0,.4);transition:.3s;pointer-events:none}.toast.show{transform:translate(-50%,0);opacity:1}
+    .reveal { opacity:0; transform:translateY(18px); transition:.65s ease; }.reveal.visible{opacity:1;transform:none}
+    .pro-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:15px; }
+    .pro-card { border-radius:22px; padding:26px 24px; }
+    .pro-head { display:flex; align-items:center; gap:13px; margin-bottom:15px; }
+    .pro-head .icon { width:44px; height:44px; border-radius:13px; display:grid; place-items:center; background:rgba(114,167,255,.12); color:var(--blue); font-weight:800; flex:0 0 auto; }
+    .pro-head h3 { margin:0; font-size:20px; }
+    .pro-head .key { display:block; color:#78909f; font-size:12.5px; font-family:Consolas,monospace; margin-top:3px; }
+    .pro-desc { margin:0 0 14px; color:#c0d0da; font-size:14px; }
+    .pro-list { list-style:none; margin:0; padding:0; display:grid; gap:9px; }
+    .pro-list li { border:1px solid var(--line); border-radius:13px; padding:11px 13px; background:rgba(5,13,20,.35); font-size:13px; color:#c8d6de; }
+    .pro-list b { display:block; color:var(--cyan); margin-bottom:2px; font-size:13px; }
+    .pro-switch { margin-top:15px; padding-top:13px; border-top:1px dashed var(--line); color:var(--muted); font-size:12.5px; }
+    .pro-switch b { color:var(--green); font-family:Consolas,monospace; }
+    @media (max-width: 980px){.nav-links a{display:none}.hero{grid-template-columns:1fr;padding-top:55px}.assistant-card{min-height:auto}.metrics{grid-template-columns:repeat(2,1fr)}.knowledge-spotlight{grid-template-columns:1fr}.value-grid{grid-template-columns:repeat(2,1fr)}.pro-grid{grid-template-columns:1fr}.demo-shell,.tools-layout,.orchestration{grid-template-columns:1fr}.step-list{display:flex;overflow:auto;border-right:0;border-bottom:1px solid var(--line)}.step{min-width:185px}.tool-nav{position:static;display:grid;grid-template-columns:repeat(2,1fr)}.favorite-lab,.safety-grid{grid-template-columns:1fr}.close{grid-template-columns:1fr}.close-actions{justify-content:flex-start}.authority{grid-template-columns:1fr}.limits{grid-template-columns:repeat(3,1fr)}}
+    @media (max-width: 640px){.wrap{width:min(100% - 24px,1200px)}.brand small{display:none}.nav-inner{height:60px}.hero{padding:46px 0 50px;min-height:auto;gap:36px}h1{font-size:45px}.hero-copy{font-size:16px}.metrics{grid-template-columns:1fr 1fr;margin-bottom:72px}.metric{padding:17px;min-height:112px}.metric strong{font-size:30px}.section-head{display:block}.section-head p{margin-top:15px}.kind-grid{grid-template-columns:repeat(2,1fr)}.knowledge-lifecycle{grid-template-columns:1fr 1fr}.meta-row{grid-template-columns:1fr}.value-grid{grid-template-columns:1fr}.demo-stage{padding:22px}.stage-content h3{font-size:27px}.evidence-grid,.tool-points{grid-template-columns:1fr}.tool-nav{grid-template-columns:1fr}.favorite-lab{grid-template-columns:1fr}.limits{grid-template-columns:repeat(2,1fr)}.close{padding:28px}.close h2{font-size:32px}.nav .btn{padding:8px 11px}.brand{font-size:13px}}
+    @media (max-width: 980px){.preference-grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width: 640px){.design-block,.knowledge-main,.knowledge-meta{padding:20px}.kind-grid,.preference-grid{grid-template-columns:1fr}.design-table{font-size:13px}}
+    @media (prefers-contrast: more){:root{--line:rgba(210,232,246,.42);--muted:#cbd9e2}.glass{border-width:2px;box-shadow:none}.btn,.tab,.cat,.scenario-btn{border-color:rgba(210,232,246,.48)}.row-badge,.chip{outline:1px solid rgba(210,232,246,.34)}}
+    @media (prefers-reduced-transparency: reduce){.nav{background:#071018;backdrop-filter:none}.noise{opacity:.08}}
+    .orchestration > * { min-width: 0; }
+    @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}.reveal,.call{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+  <nav class="nav" id="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top" aria-label="返回顶部">
+        <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="logoG" x1="10" y1="8" x2="54" y2="56"><stop stop-color="#5B8CFF"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient></defs><rect x="6" y="6" width="52" height="52" rx="16" fill="url(#logoG)"/><circle cx="32" cy="24" r="8" fill="white"/><path d="M17 48c1.8-9 7.1-14 15-14s13.2 5 15 14" fill="none" stroke="white" stroke-width="6" stroke-linecap="round"/><path d="M47 13v9M42.5 17.5h9" stroke="#FDE68A" stroke-width="3" stroke-linecap="round"/></svg>
+        <span>dsh-personal-assistant <small>0.13.0</small></span>
+      </a>
+      <div class="nav-links">
+        <a href="#knowledge-core">个人知识库</a><a href="#flow">完整流程</a><a href="#proactivity">三种主动</a><a href="#tools">工具说明</a><a href="#favorite">收藏学习</a><a href="#safety">安全边界</a>
+        <button class="btn" id="navDemo">开始演示</button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="top">
+    <div class="wrap">
+      <header class="hero">
+        <div>
+          <div class="eyebrow">主动型个人助理内核</div>
+          <h1><span class="gradient-text">覆盖任务全过程：</span><br/>理解、执行、跟进与确认。</h1>
+          <p class="hero-copy">为 Agent 提供<strong>用户上下文、个人知识、资源发现、任务跟进和主动检查</strong>能力，并要求 Agent 在执行外部承诺前确认具体动作的授权。</p>
+          <div class="hero-actions">
+            <button class="btn primary" id="heroDemo">▶ 开始流程演示</button>
+            <a class="btn" href="#tools">查看完整能力</a>
+          </div>
+          <div class="trust-row"><span><i></i> 本地优先</span><span><i></i> 明确授权</span><span><i></i> 有界上下文</span><span><i></i> 成功经验可复用</span></div>
+        </div>
+        <div class="assistant-card glass reveal" aria-label="助理工作演示卡片">
+          <div class="window-bar"><div class="dots"><b></b><b></b><b></b></div><span class="status">个人助理流程示例</span></div>
+          <div class="chat">
+            <div class="bubble user">明天去上海出差，请根据我的偏好准备交通、住宿与行程方案。</div>
+            <div class="mini-calls">
+              <div class="call">assistant_context · 读取靠窗偏好与待办</div>
+              <div class="call">assistant_resources · 发现当前可用能力</div>
+              <div class="call">assistant_workflow · 记录可复用流程</div>
+              <div class="call">assistant_proactivity · 订阅行程邮件变化（建议，默认关闭）</div>
+              <div class="call wait">assistant_task · 建立跟进与出行前天气复核</div>
+            </div>
+            <div class="bubble agent">已根据您的交通与住宿偏好比较候选方案，并记录后续跟进事项。真实预订前，将请您确认具体班次、房型和价格。</div>
+            <div class="approval"><div class="lock">⌁</div><div><b>授权检查：等待用户确认</b>预订、付款、发送、提交等外部承诺需事先确认具体动作的授权。</div></div>
+          </div>
+        </div>
+      </header>
+
+      <div class="metrics reveal">
+        <div class="metric glass"><strong data-count="9">0</strong><span>个模型工具（例程依赖调度服务）</span></div>
+        <div class="metric glass"><strong data-count="12">0</strong><span>类个人知识</span></div>
+        <div class="metric glass"><strong data-count="6">0</strong><span>类面板管理数据</span></div>
+        <div class="metric glass"><strong data-count="8">0</strong><span>类业务偏好，另设“其他”</span></div>
+      </div>
+
+      <section id="knowledge-core">
+        <div class="section-head reveal"><div><div class="eyebrow">Personal data structure</div><h2>个人知识库、偏好与任务的总体结构</h2></div><p>个人知识库由 12 类知识记录组成，保存事实、经历与决策依据；偏好独立记录用户的服务要求，任务独立维护待办与执行状态。三类数据在具体需求中共同使用，支持基于个人情况的判断与持续跟进。</p></div>
+        <div class="authority reveal">
+          <article class="authority-card glass"><div class="top"><h3>个人知识库 Knowledge</h3><span class="badge">事实、经历与依据</span></div><ul><li>12 类：对象、事件、状态、决策等</li><li>带来源、时间、证据、置信度和关联</li><li>状态变化：旧记录 stale + 新记录关联</li><li>敏感记录默认隔离，不进入普通上下文</li></ul><footer>例：上次选高铁是因门到门更快，而非长期交通偏好</footer></article>
+          <article class="authority-card glass"><div class="top"><h3>偏好 Preference</h3><span class="badge">服务标准与适用情景</span></div><ul><li>稳定习惯：长期适用</li><li>情景覆盖：只在特定场景生效</li><li>推断偏好置信度必须低于 1</li><li>单次选择不会擅自泛化</li></ul><footer>例：travel.seat = 靠窗；陪客户用餐 = 不安排酒</footer></article>
+          <article class="authority-card glass"><div class="top"><h3>任务 Task</h3><span class="badge">待办与执行状态</span></div><ul><li>截止时间、预订、审批、跟进</li><li>明确下一步与审批需求</li><li>改期自动重绑到点唤醒</li><li>完成、取消或删除后清理唤醒；失败时保留错误与重试信息</li></ul><footer>例：今晚 20:00 前确认酒店；下单前等待精确批准</footer></article>
+        </div>
+        <p class="not-equal reveal">知识、偏好与任务分别管理；状态变化保留历史依据；记录本身不构成行动授权。</p>
+        <article class="design-block glass reveal" style="margin-top:18px">
+          <h3>设计依据：让个人信息能够被解释、修正和持续使用</h3>
+          <p>调研方案分别强调授权上下文、行为学习、身份权限、显式记忆或关系与意图建模。本项目关注这些信息进入个人决策后的使用方式：依据是否明确、情景是否适用、状态是否有效，以及用户能否纠正。</p>
+          <div class="design-table-wrap" role="region" aria-label="调研方案与本项目设计对应表" tabindex="0">
+            <table class="design-table">
+              <caption>依据所提供的《个人助理智能体知识库－现有 LLM 产品调研》归纳。以下说明设计取舍，不代表对相关产品当前能力的完整评价或效果排名。</caption>
+              <thead><tr><th scope="col">调研中的方案</th><th scope="col">需要解决的个性化问题</th><th scope="col">本项目的数据结构设计</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">隐性行为学习<br>OpenAI Dots、Alexa + Ambient</th><td>如何解释和纠正行为推断，避免将一次选择固化为长期习惯？</td><td>分别保存观察、决策理由与假设；来源和置信度可检查。可复用偏好单独维护，推断不能作为已确认的用户指令。</td></tr>
+                <tr><th scope="row">显式画像与上下文图谱<br>Today</th><td>如何保留用户控制权，同时降低持续维护个人信息的负担？</td><td>结合对话中的明确陈述、按需询问与收藏提炼形成记录；支持查看、编辑和删除，保留来源以便纠正。</td></tr>
+                <tr><th scope="row">授权上下文与身份权限<br>Meta Muse、Manus Cue</th><td>如何在访问权限之外，说明用户的目标、约束与选择理由？</td><td>知识保存目标、状态和决策依据；偏好保存稳定与情景化的服务要求；记录与执行授权分别管理。</td></tr>
+                <tr><th scope="row">兴趣、意图与社交关系<br>字节小豆 / Spell、腾讯小微</th><td>如何把兴趣和关系用于有时间、情景和证据约束的具体决策？</td><td>将人物、关系、事件与决策按记录关联，区分当前状态与历史信息；涉及他人的事实和偏好保存在知识中，避免混入用户本人偏好。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="design-note">个性化的设计重点在于：同一用户在不同情景中采用适用的约束；相同请求在不同用户的经历、目标和偏好下形成有依据的不同方案。实际效果仍需通过任务评估验证。</p>
+        </article>
+        <div class="knowledge-spotlight reveal">
+          <article class="knowledge-main glass">
+            <h3>个人知识库：12 类记录及其用途</h3><p>类型说明一条信息在判断中承担什么作用，正文保存具体内容。下列四组用于解释现有 12 类记录；示例围绕同一用户的项目与出差展开。</p>
+            <div class="kind-grid">
+              <div class="kind-group"><h4>① 对象、关联与资料</h4>
+                <div class="kind-item"><strong>对象 · entity</strong><span>林岚是 Apollo 项目的联系人。</span><small>用途：识别人物、项目、地点等对象。</small></div>
+                <div class="kind-item"><strong>关系 · relation</strong><span>林岚负责该项目的需求确认。</span><small>用途：确定沟通对象与职责关系。</small></div>
+                <div class="kind-item"><strong>产出物 · artifact</strong><span>上次项目汇报材料的文件位置。</span><small>用途：查找已有成果与参考资料。</small></div>
+              </div>
+              <div class="kind-group"><h4>② 事实、观察与当前状态</h4>
+                <div class="kind-item"><strong>事件 · event</strong><span>上次赴南京参加了项目评审。</span><small>用途：保留带时间的个人经历。</small></div>
+                <div class="kind-item"><strong>观察 · observation</strong><span>最近三次长会均提前离场。</span><small>用途：保存行为证据，供后续分析。</small></div>
+                <div class="kind-item"><strong>状态 · state</strong><span>本周处于项目验收阶段。</span><small>用途：识别当前有效的阶段与约束。</small></div>
+              </div>
+              <div class="kind-group"><h4>③ 目标、决策与承诺</h4>
+                <div class="kind-item"><strong>目标 · goal</strong><span>本季度完成 Apollo 项目验收。</span><small>用途：判断方案是否服务当前目标。</small></div>
+                <div class="kind-item"><strong>决策 · decision</strong><span>上次选高铁，因为门到门更快。</span><small>用途：保留选择理由，供条件相似时参考。</small></div>
+                <div class="kind-item"><strong>承诺 · commitment</strong><span>已向客户承诺周五提供修订稿。</span><small>用途：保存承诺事实；截止与跟进另建任务。</small></div>
+              </div>
+              <div class="kind-group"><h4>④ 可复用依据与待验证推断</h4>
+                <div class="kind-item"><strong>方法模式 · pattern</strong><span>历次晚到行程均优先比较接驳时间。</span><small>用途：保留有依据的经验；执行流程另行验证。</small></div>
+                <div class="kind-item"><strong>规则 · rule</strong><span>客户园区要求访客提前一天登记。</span><small>用途：保存外部规则及其适用范围。</small></div>
+                <div class="kind-item"><strong>假设 · hypothesis</strong><span>用户可能倾向于缩短会议时长。</span><small>用途：保留待确认推断，不能视为确定偏好。</small></div>
+              </div>
+            </div>
+          </article>
+          <article class="knowledge-meta glass">
+            <h3>记录内容之外，还要保留适用依据</h3><p>仅保存“曾选择高铁”不足以支持下一次决策。还需明确这条信息从何而来、当时为何成立，以及现在是否仍然适用。</p>
+            <div class="meta-stack">
+              <div class="meta-row"><b>来源与证据</b><span>区分用户陈述、直接观察、推断与导入。例如“门到门更快”应有用户说明或比较依据。</span></div>
+              <div class="meta-row"><b>置信度</b><span>用 0–1 表示确定程度；推断必须低于 1。“可能不喜欢长会”不能等同于用户明确要求。</span></div>
+              <div class="meta-row"><b>时间与状态</b><span>记录事件时间、有效期与最后确认时间。验收结束后，将原状态标为过时，并关联新状态。</span></div>
+              <div class="meta-row"><b>关联关系</b><span>将出差事件、客户联系人和交通决策关联，保留选择发生时的背景；关联记录不等于自动进行图谱推理。</span></div>
+              <div class="meta-row"><b>隐私级别</b><span>区分普通、私密与敏感记录；敏感记录默认不进入普通上下文，避免在无关请求中使用。</span></div>
+              <div class="meta-row"><b>维护与纠正</b><span>支持查看、编辑、归档和经确认删除；更新时校验记录版本，防止较早修改覆盖较新内容。</span></div>
+            </div>
+            <p class="design-note">调用方式：先按当前问题检索相关知识，再由 Agent 结合偏好与任务判断。当前实现支持文本检索、类型筛选和记录关联；类别本身不直接生成推荐结果。</p>
+          </article>
+        </div>
+        <div class="knowledge-lifecycle glass reveal">
+          <div class="life-step"><b>01 CREATE</b>只保存有长期意义、来源明确的信息</div>
+          <div class="life-step"><b>02 SEARCH</b>根据当前问题检索，assistant_context 最多返回 8 条</div>
+          <div class="life-step"><b>03 CHANGE</b>状态变化时旧记录标为 stale，新记录关联旧记录</div>
+          <div class="life-step"><b>04 ARCHIVE / DELETE</b>过时内容归档；删除具体记录必须得到明确确认</div>
+        </div>
+        <div id="memory">
+          <article class="design-block glass reveal">
+            <h3>8 类偏好：按服务领域组织具体要求</h3>
+            <p>出行、饮食、作息、沟通、工作、健康、财务与穿衣是 8 个业务类别，另有“其他”补充类别。类别便于查找和维护；实际参与判断的是每条偏好的具体要求、适用情景、来源与置信度。以下均为示例。</p>
+            <div class="preference-grid">
+              <div class="kind-item"><strong>出行 · travel</strong><span>座位优先靠窗；出差住宿优先临近会场。</span></div>
+              <div class="kind-item"><strong>饮食 · food</strong><span>口味清淡；客户用餐时不安排酒。</span></div>
+              <div class="kind-item"><strong>作息 · schedule</strong><span>工作日上午保留两小时专注时间。</span></div>
+              <div class="kind-item"><strong>沟通 · communication</strong><span>日常汇报简洁；紧急事项优先电话。</span></div>
+              <div class="kind-item"><strong>工作 · work</strong><span>汇报先列结论，再列依据与待决事项。</span></div>
+              <div class="kind-item"><strong>健康 · health</strong><span>只在长时间连续工作后提醒休息。</span></div>
+              <div class="kind-item"><strong>财务 · finance</strong><span>出差票据当天整理，便于后续报销。</span></div>
+              <div class="kind-item"><strong>穿衣 · clothing</strong><span>常用尺码为 L，版型优先宽松。</span></div>
+            </div>
+            <p class="design-note">稳定与情景偏好使用同一偏好项区分适用范围。例如：住宿通常优先市中心；“项目出差”情景下优先临近会场。当前情景匹配时，采用情景偏好，其余情景保留稳定偏好；单次选择不直接推广为长期习惯。</p>
+          </article>
+          <article class="design-block glass reveal">
+            <h3>示例：再次为同一用户安排南京项目出差</h3>
+            <p>以下展示数据如何影响方案，为说明性示例；实际交通、房源和时间仍需查询当前信息。</p>
+            <div class="design-table-wrap" role="region" aria-label="个人数据参与出差决策的示例" tabindex="0">
+              <table class="design-table">
+                <thead><tr><th scope="col">参与判断的数据</th><th scope="col">记录内容</th><th scope="col">对本次方案的影响</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">知识：历史决策</th><td>上次选择高铁，原因是门到门耗时更短。</td><td>本次仍比较门到门时间；若航班更合适，可选择航班，不从一次行为推定长期交通偏好。</td></tr>
+                  <tr><th scope="row">知识：当前状态与关系</th><td>项目处于验收阶段；林岚负责需求确认。</td><td>准备验收相关材料，并将待确认问题对应到具体联系人；对外发送前另行取得授权。</td></tr>
+                  <tr><th scope="row">稳定偏好与情景偏好</th><td>住宿通常优先市中心；项目出差优先临近会场。</td><td>本次按会场通勤时间比较酒店；其他情景仍采用稳定偏好。</td></tr>
+                  <tr><th scope="row">任务：尚未完成的事项</th><td>今晚 20:00 前确认酒店，当前尚待用户批准。</td><td>保留确认节点与提醒；真实预订须针对班次、房型和价格获得明确授权。</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="design-note">在行为学习和画像检索基础上，本项目进一步明确记录的职责、适用条件与纠正方式，使方案差异能够对应到具体的个人数据。结构设计提供个性化判断所需的依据，最终质量取决于记录准确性、检索结果和 Agent 的判断。</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="value">
+        <div class="section-head reveal"><div><div class="eyebrow">Core capabilities</div><h2>个人助理内核的关键能力</h2></div><p>偏好、个人知识、任务、工作流和主动检查分别承担明确职责，共同支持个性化决策、任务执行与持续跟进。</p></div>
+        <div class="value-grid">
+          <article class="value-card glass reveal"><div class="icon">人</div><h3>先读取相关个人信息</h3><p>Agent 根据当前情景选用稳定偏好或相应的情景偏好；缺少关键信息时，仅询问影响方案的缺失信息。</p></article>
+          <article class="value-card glass reveal"><div class="icon">全</div><h3>使用当前可用资源</h3><p>动态发现 Tool、MCP 与 Skill；优先直接能力，再使用 Skill、浏览器、桌面或人工步骤。</p></article>
+          <article class="value-card glass reveal"><div class="icon">跟</div><h3>持续跟进已记录事项</h3><p>截止、审批、预订和后续动作进入任务系统；到期唤醒随改期重新安排，任务结束后清理。</p></article>
+          <article class="value-card glass reveal"><div class="icon">醒</div><h3>三种主动，全部可控</h3><p>需求内主动识别目标、依赖与后续事项；时间驱动主动从对话、已读来源和知识中提取未来事项并安排提前复核（如出行天气）；外部信号主动按逐项启停的订阅检查，助理建议默认关闭。</p></article>
+          <article class="value-card glass reveal"><div class="icon">存</div><h3>保存确认经验与验证流程</h3><p>可复用的用户服务要求保存为偏好，事实与决策依据保存为知识；验证过的资源序列发布为候选 Skill，每次使用前仍重新判断当前情景。</p></article>
+          <article class="value-card glass reveal"><div class="icon">界</div><h3>执行明确的授权检查</h3><p>调研、比较和草拟可自主推进；购买、预订、付款、发送、提交、删除必须获得具体动作的确认。</p></article>
+        </div>
+      </section>
+
+      <section id="flow">
+        <div class="section-head reveal"><div><div class="eyebrow">End-to-end demo</div><h2>从需求识别到验证与跟进</h2></div><p>点击左侧步骤，或使用“自动播放”，查看“明天去上海出差”这一需求如何经过上下文读取、资源调用、授权确认、结果验证与后续跟进。页面使用预设示例，不调用真实业务服务。</p></div>
+        <div class="demo-shell glass reveal">
+          <div class="step-list" id="stepList"></div>
+          <div class="demo-stage">
+            <div class="demo-top"><span class="live-tag">动态演示</span><div class="progress" id="flowProgressTrack" role="progressbar" aria-label="流程进度" aria-valuemin="1" aria-valuemax="9" aria-valuenow="1"><span id="flowProgress"></span></div></div>
+            <div class="stage-content" id="stageContent" aria-live="polite" aria-atomic="true"></div>
+            <div class="stage-actions"><small>键盘 ← / → 也可切换步骤</small><button class="btn primary" id="autoPlay" aria-pressed="false">▶ 自动播放</button></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="proactivity">
+        <div class="section-head reveal"><div><div class="eyebrow">Three modes of initiative</div><h2>三种主动类型：可核验的主动行为</h2></div><p>主动行为分为需求内扩展、时间驱动跟进和外部信息检查。前两类由独立开关控制，外部信息按信号源逐项启停；任务唤醒另设开关。</p></div>
+        <div class="pro-grid">
+          <article class="pro-card glass reveal">
+            <div class="pro-head"><div class="icon">需</div><div><h3>需求内主动</h3><span class="key">requestProactivity</span></div></div>
+            <p class="pro-desc">在执行用户请求前，识别影响结果的目标、约束、前置依赖与后续动作。</p>
+            <ul class="pro-list">
+              <li><b>识别依赖与后续动作</b>识别影响结果的决策、前置依赖与待跟进事项。</li>
+              <li><b>对照偏好与约束权衡</b>只追问会改变方案的缺失信息，不使用固定问题清单。</li>
+              <li><b>建立跟进任务</b>需要后续执行的事项写入 assistant_task，并在回复中说明何时跟进。</li>
+              <li><b>关怀自然融入方案</b>舒适、健康、安全、日程缓冲和开支在方案中自然体现。</li>
+            </ul>
+            <div class="pro-switch">开关 <b>requestProactivity</b> · 关闭时仅处理字面请求</div>
+          </article>
+          <article class="pro-card glass reveal">
+            <div class="pro-head"><div class="icon">时</div><div><h3>时间驱动主动</h3><span class="key">timeProactivity + task wake</span></div></div>
+            <p class="pro-desc">持续维护未来事项，将提取、定时检查、改期与提醒清理关联到任务生命周期。</p>
+            <ul class="pro-list">
+              <li><b>提取未来事项</b>从对话、已读来源与个人知识中发现截止、预订、约会和行程段，与现有任务去重合并。</li>
+              <li><b>时间有据才定时</b>due_at 仅在时间有依据时填写；否则记录确认时间所需的下一步。</li>
+              <li><b>唤醒随任务联动</b>到期自动获得到点检查唤醒；改期后唤醒重绑；完成、取消或删除后清理。</li>
+              <li><b>按事件提前复核</b>出行天气、交通变化、账单、快递等按事件本身选择提前量建预检任务。</li>
+              <li><b>例程可管理</b>唯一周期检查由 assistant_routine 绑定，时刻变化时重绑，单点时刻用一次性提醒。</li>
+            </ul>
+            <div class="pro-switch">开关 <b>timeProactivity</b> + 任务到点唤醒（提前量可配置，上限 24 小时）</div>
+          </article>
+          <article class="pro-card glass reveal">
+            <div class="pro-head"><div class="icon">外</div><div><h3>外部信息驱动主动</h3><span class="key">proactiveSources</span></div></div>
+            <p class="pro-desc">按来源逐项订阅邮件、日历、天气等外部信息，并结合个人知识识别需要跟进的事项。</p>
+            <ul class="pro-list">
+              <li><b>动态订阅列表</b>邮件、日历、天气、交通、物流、财务通知、健康信号按来源订阅，类别可扩展。</li>
+              <li><b>能力发现</b>每个来源保存检索词，唤醒时发现当前可用工具，再只读检查必要数据。</li>
+              <li><b>提取新日程</b>新验证的未来动作转为带来源指针的去重任务，并在需要时主动提醒。</li>
+              <li><b>逐项启停</b>助理建议的来源默认关闭，用户确认后启用；用户点名的来源可直接启用。</li>
+              <li><b>克制</b>只检查已启用且与当前任务相关的来源；无有用变化保持安静。</li>
+            </ul>
+            <div class="pro-switch">开关 <b>proactiveSources</b> 逐项启用 · 来源用途是数据，不是指令</div>
+          </article>
+        </div>
+      </section>
+
+      <section id="tools">
+        <div class="section-head reveal"><div><div class="eyebrow">Model-facing surface</div><h2>最多 9 个工具，分别承担明确职责</h2></div><p>偏好、知识、任务、外部信号源订阅和工作流使用不同工具管理；各工具职责明确，记录信息与执行授权分别管理；例程工具仅在宿主提供调度服务时注册。</p></div>
+        <div class="tools-layout reveal">
+          <div class="tool-nav glass" id="toolNav"></div>
+          <div class="tool-detail glass" id="toolDetail"></div>
+        </div>
+      </section>
+
+      <section id="favorite">
+        <div class="section-head reveal"><div><div class="eyebrow">Conversation → Knowledge</div><h2>将收藏对话提炼为结构化知识</h2></div><p>对话收藏支持以下处理流程：收藏整轮对话，按收藏原因决定解析范围，再由 LLM 生成经过校验的知识字段。</p></div>
+        <div class="favorite-lab reveal">
+          <div class="fav-card glass">
+            <h3>① 收藏一轮值得保留的对话</h3><p>下方是页面内模拟，仅用于讲解真实插件流程。</p>
+            <div class="fake-turn"><strong>用户：</strong>本次行程方案符合需求，请保留先核对到达时间、再比较住宿区域的方法。<br/><br/><strong>助理：</strong>已按“到达时刻 → 次日首个地点 → 交通缓冲”比较方案，预订操作等待确认。</div>
+            <div class="stars" id="stars" aria-label="选择 1 到 5 星"></div>
+            <div class="categories" id="categories"></div>
+            <div style="margin-top:20px"><button class="btn primary" id="parseBtn">模拟收藏并解析</button></div>
+          </div>
+          <div class="knowledge-card glass">
+            <h3>② 解析为知识记录</h3><p>过程类收藏包含执行过程概述；结果类仅提供问题与最终输出，并禁止推测未提供的过程。收藏原因决定解析范围，知识类型由模型根据内容判断。</p>
+            <div class="parse-status" role="status" aria-live="polite"><i id="parseDot"></i><span id="parseText">等待收藏</span></div>
+            <div class="knowledge-output" id="knowledgeOutput" aria-live="polite">
+              <div class="kv"><span>知识类型</span><span id="koKind">Pattern · 方法模式</span></div>
+              <div class="kv"><span>标题</span><span id="koTitle">根据到达时刻选择住宿区域</span></div>
+              <div class="kv"><span>摘要</span><span id="koContent">比较住宿方案时，综合考虑到达时刻、次日首个地点、交通缓冲与房价。</span></div>
+              <div class="kv"><span>优先级</span><span id="koPriority">4 / 5</span></div>
+              <div class="kv"><span>溯源</span><span>favorite:&lt;id&gt; · LLM 提炼</span></div>
+            </div>
+            <div class="beta-note">此处演示一条知识的生成。实际插件还可同时提炼偏好；解析质量取决于输入内容与已配置的模型。</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="panel">
+        <div class="section-head reveal"><div><div class="eyebrow">Web control center</div><h2>在统一面板中维护个人数据与跟进事项</h2></div><p>设置 → 个人助理。面板管理外部信号源、唤醒、偏好、对话收藏、导入收藏夹和个人知识。可编辑数据与对应对话工具使用一致的校验规则，唤醒信息从宿主调度器读取。以下为静态示例，不连接实际数据。</p></div>
+        <div class="control glass reveal">
+          <div class="tabs" id="tabs" role="tablist" aria-label="个人助理管理清单"></div>
+          <div class="tab-panel" id="tabPanel" role="tabpanel" tabindex="0"></div>
+        </div>
+      </section>
+
+      <section id="orchestration">
+        <div class="section-head reveal"><div><div class="eyebrow">Adaptive orchestration</div><h2>根据当前可用能力选择执行方式</h2></div><p>任务开始前先检查当前可见资源。发现范围包括当前已注册的 Tool、MCP 工具与 Skill；浏览器、桌面等能力也需相应资源支持。以下展示候选处理流程。</p></div>
+        <div class="orchestration reveal">
+          <div class="scenario-box glass"><h3 style="margin-top:0">选择一个任务</h3><div id="scenarioButtons"></div></div>
+          <div class="route-box glass"><div class="live-tag">候选处理流程示例</div><div class="route-track" id="routeTrack"></div><div class="route-result" id="routeResult"></div></div>
+        </div>
+      </section>
+
+      <section id="safety">
+        <div class="section-head reveal"><div><div class="eyebrow">Trust by design</div><h2>主动行为遵循明确的授权边界</h2></div><p>提醒、例程、知识、工作流和生成的 Skill 都不构成授权。行为规则要求 Agent 在执行外部承诺前确认具体动作；外部工具仍执行各自的权限与交易校验。</p></div>
+        <div class="safety-grid reveal">
+          <article class="safety-card safe glass"><h3>✓ 可自主推进</h3><ul><li>读取、检索与比较信息</li><li>准备草案、清单和候选方案</li><li>创建或更新本地偏好、知识和任务；删除另行确认</li><li>创建可逆提醒与跟进节点</li><li>并行研究并报告进展</li><li>将已独立验证的资源序列发布为候选 Skill</li></ul></article>
+          <article class="safety-card gate glass"><h3>⌁ 必须精确确认</h3><ul><li>发送消息或邮件</li><li>购买、预订与付款</li><li>提交表单、报销或申请</li><li>删除数据与不可逆修改</li><li>对外作出承诺</li><li>医疗或法律承诺</li></ul></article>
+        </div>
+        <div class="glass reveal" style="border-radius:22px;padding:25px;margin-top:16px">
+          <h3 style="margin-top:0">本地、有界、可追溯</h3>
+          <p style="color:var(--muted);font-size:13px">插件状态默认保存在 DSH 数据目录的本地 JSON 文件，插件不发送遥测。对话收藏与导入收藏夹的解析会将有界内容交给已配置的 LLM，待解析内容可在启动后自动处理；导入 B 站、知乎或 QQ 音乐收藏夹会访问对应平台接口；小红书提取在浏览器页面内进行，浏览器书签 HTML 则在本机解析。其他外部查询由 Agent 调用可用资源完成。知识写入校验会检查常见凭据、私钥、完整证件号和支付卡号。</p>
+          <div class="limits"><div class="limit"><b>200</b><span>偏好上限</span></div><div class="limit"><b>500</b><span>知识上限</span></div><div class="limit"><b>500</b><span>任务上限</span></div><div class="limit"><b>100</b><span>工作流上限</span></div><div class="limit"><b>8 MiB</b><span>状态总量上限</span></div></div>
+        </div>
+      </section>
+
+      <section>
+        <div class="close glass reveal">
+          <div><div class="eyebrow">Summary</div><h2>以个人知识、偏好与任务支持决策、执行和持续跟进。</h2><p>dsh-personal-assistant 为 Agent 提供可扩展的个人上下文与任务执行能力，并通过有界检索、明确授权和独立验证控制风险。</p></div>
+          <div class="close-actions"><button class="btn primary" id="replay">重播完整流程</button><a class="btn" href="https://github.com/Mint-hfut/dsh-personal-assistant/blob/main/README.zh.md" target="_blank">打开 README</a><a class="btn" href="https://github.com/Mint-hfut/dsh-personal-assistant/blob/main/DEMO.zh.md" target="_blank">演示脚本</a></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="page-footer wrap"><span>dsh-personal-assistant 0.13.0 · 单文件离线演示页</span><span class="source-links"><a href="https://github.com/Mint-hfut/dsh-personal-assistant/blob/main/README.zh.md" target="_blank">功能文档</a><a href="https://github.com/Mint-hfut/dsh-personal-assistant/blob/main/DEMO.zh.md" target="_blank">3–5 分钟脚本</a><a href="#top">回到顶部 ↑</a></span></footer>
+  <div class="toast" id="toast" role="status" aria-live="polite">流程已开始</div>
+
+  <script>
+    const flowSteps = [
+      { title:'识别需求与信息缺口', tool:'用户意图', kicker:'INPUT · NATURAL LANGUAGE', heading:'从一句出差需求中识别目标、约束和待确认信息。', body:'助理识别安全、准时和符合用户习惯等目标，并判断哪些缺失信息会改变交通、住宿或行程安排。', evidence:['按需求确认缺失信息','识别交通、住宿、行程与跟进','仅询问影响方案的缺失信息','不把准备方案误当成下单授权'] },
+      { title:'读取用户上下文', tool:'assistant_context', kicker:'CONTEXT · BOUNDED RETRIEVAL', heading:'读取必要的偏好、任务与相关个人知识。', body:'普通调用读取最新偏好、活跃任务和例程；只有当前问题确实依赖个人历史时，才用 knowledge_query 检索最多 8 条非敏感知识。', evidence:['靠窗偏好','当前待办与审批','按查询取相关历史','按需检索，排除敏感记录'] },
+      { title:'识别完整任务与依赖', tool:'Agent 行为规则', kicker:'PLAN · HUMAN JUDGMENT', heading:'识别出差全程的决策、依赖与后续跟进事项。', body:'根据具体需求分析目的地交通、到达时间、次日首个地点、酒店位置、天气与时间缓冲，按任务需要确定处理范围。', evidence:['影响结果的决策','前置依赖','需要用户回答的问题','后续动作与时间点'] },
+      { title:'动态发现资源', tool:'assistant_resources', kicker:'DISCOVER · LIVE CAPABILITIES', heading:'检查当前可用能力，并选择优先级最高的执行方式。', body:'发现当前 Agent 的原生 Tool、MCP 工具与 Skill。优先稳定直连能力，再使用 Skill、浏览器或桌面操作，最后提供人工接管步骤。', evidence:['Tool / API 优先','Skill 复用','浏览器与网页自动化','必要时使用桌面操作'] },
+      { title:'开始记录流程', tool:'assistant_workflow(start)', kicker:'TRACE · SAFE METADATA', heading:'把可能复用的多资源流程纳入可验证轨迹。', body:'只记录根调用 id、资源标识、结果状态和时间；不保存参数、页面内容、URL、邮件、截图或其他外部文本。', evidence:['开始时即记录','默认最多 200 步','轨迹截断不可发布','原始目标不进入生成 Skill'] },
+      { title:'并行完成安全工作', tool:'Tool / Skill / Browser', kicker:'EXECUTE · PARALLEL WHERE POSSIBLE', heading:'查询、比较、草拟与安排跟进并行推进。', body:'独立部分同时执行，缩短等待；在处理中报告关键进展。候选结果带来源与查询时间，演示数据不会冒充真实库存。', evidence:['交通与酒店候选','结合偏好比较','行程草案','assistant_task 建立后续节点'] },
+      { title:'执行外部动作前检查授权', tool:'精确动作确认', kicker:'APPROVAL · EXACT ACTION', heading:'外部承诺必须由用户确认具体动作。', body:'真实预订、付款、发送确认、提交报销或删除数据前，清楚列出即将执行的动作、对象与价格，并等待明确确认。', evidence:['提醒不等于授权','工作流不等于授权','Skill 不等于授权','仅对当下精确动作确认'] },
+      { title:'独立验证结果', tool:'verification call', kicker:'VERIFY · SEPARATE EVIDENCE', heading:'通过独立的成功调用验证最终结果。', body:'只有存在独立成功验证、轨迹未截断且资源序列有效，流程才有资格发布为候选 Skill；失败则记录原因并保留可重试状态。', evidence:['验证调用独立','成功调用 id 可追溯','失败不发布','Skill 发布失败可重试'] },
+      { title:'保存经验并安排跟进', tool:'workflow + task + wake', kicker:'REUSE · FOLLOW THROUGH', heading:'保存确认经验、发布验证序列，并安排未完成事项。', body:'可复用的服务要求保存为偏好，事实与决策依据保存为知识；验证过的资源序列生成 workspace-scoped runtime Skill。时间驱动主动会从对话、已读来源（邮件、日历）和个人知识中提取未来事项，去重后转为任务；出行前天气、账单到期等条件单独建立提前复核，来源支持具体时间才用 due_at，否则记录确认时间所需的下一步。', evidence:['候选 Skill 重新判断适用性','偏好与事实分别记录','未来事项去重后转为任务','天气/账单等条件提前复核','到点唤醒跟随任务生命周期','无可行动变化时保持安静'] }
+    ];
+
+    const tools = [
+      { name:'assistant_context', label:'上下文', actions:['read'], desc:'个性化决策与主动检查前的统一入口。读取偏好、活跃任务、例程；只有显式 knowledge_query 时才返回最多 8 条非敏感知识。', points:[['有界加载','偏好最新 50 条，任务有上限，知识按需取。'],['先读再决定','先读取相关个人信息与当前承诺，再作判断。'],['敏感隔离','普通上下文不会返回敏感知识。'],['ID 续接','返回记录 id，后续变更交给对应管理工具。']] },
+      { name:'assistant_preference', label:'偏好', actions:['list','set','delete'], desc:'保存用户稳定或情景化的习惯与约束。情景偏好只在适用场景覆盖稳定记录；推断偏好保持较低置信度，不能当作用户指令。', points:[['稳定 + 情景','同一 key 可同时存在全局与情景记录。'],['显式确认','只有用户明确说过或确认过才能置信度为 1。'],['拒绝泛化','一次选择不会自动变成长期偏好。'],['矛盾更新','当前说法冲突时更新或删除旧偏好。']] },
+      { name:'assistant_knowledge', label:'知识', actions:['list','get','search','create','update','archive','delete'], desc:'管理对象、事件、状态、观察、方法模式、目标、决策、承诺、产出物、关系、规则和假设 12 类个人知识。人物、项目与地点属于对象记录。', points:[['时间线','现实变化用旧 stale + 新关联保留历史。'],['认识论','stated / observed / inferred / imported 分开。'],['CAS 更新','expected_updated_at 防止并发覆盖。'],['保守删除','只有用户明确确认具体记录后才能删除。']] },
+      { name:'assistant_survey', label:'问卷', actions:['16 questions'], desc:'集中披露偏好的自愿问卷入口。按用户使用的语言逐题提问，跳过已有偏好；每次保存后立即回读，防止误触。', points:[['有限题库','16 题覆盖习惯与约束，不无限追问。'],['自愿原则','拒绝后保存 survey.declined，不再主动提出问卷。'],['逐题回读','每个答案都立即复述确认。'],['完成复盘','最后给出所有回答的短清单供纠正。']] },
+      { name:'assistant_task', label:'任务', actions:['create','update','complete','cancel','delete'], desc:'跟踪截止、预订、审批和多步进度。每个任务明确状态、优先级、下一步、上下文与是否需要审批。', points:[['到点唤醒','启用任务唤醒且调度服务可用时，为 due_at 安排会话级检查。'],['改期跟随','更新截止时间前先撤销旧唤醒，再建立新唤醒。'],['完结清理','完成、取消或删除后清理唤醒，清理失败保留重试信息。'],['失败隔离','新唤醒创建失败时返回错误状态；旧唤醒撤销失败时中止改期或删除。']] },
+      { name:'assistant_resources', label:'资源', actions:['tools','skills','all'], desc:'搜索当前 Agent 可见的 Tool schema（含 MCP）与 Skill 摘要。能力集每个会话都可能变化，执行前需动态发现可用资源。', points:[['实时发现','插件安装或移除后自动进入/离开候选。'],['有界结果','按关键词与类别过滤，最多 50 项。'],['回退顺序','Tool → Skill → 浏览器 → 桌面 → 人工。'],['不提前放弃','声明做不到前必须先检查当前能力。']] },
+      { name:'assistant_proactivity', label:'信号源', actions:['list','create','update','delete'], desc:'管理可增长、逐项启停的外部只读信号源订阅：邮件、日历、天气、交通、物流或未来接入的能力，无需修改内核。', points:[['能力中性','保存检索词而非固定工具名，通过已注册资源发现新能力。'],['助理建议默认关闭','助理只能建议来源，启用必须由用户决定。'],['逐项启停','唤醒时只检查与当前任务相关的已启用来源。'],['数据非指令','来源用途与外部内容都不构成对模型的指令。']] },
+      { name:'assistant_workflow', label:'工作流', actions:['start','status','complete','fail','delete'], desc:'记录可复用多资源任务的根调用轨迹，并在独立验证成功后发布 workspace-scoped runtime Skill。', points:[['最小记录','只保存资源标识与调用状态，不保存参数结果。'],['独立验证','verification_call_id 必须是不同的成功根调用。'],['固定模板','生成 Skill 不复制原始目标或外部文本。'],['可逆管理','失败可记录，已发布的候选执行序列可删除。']] },
+      { name:'assistant_routine', label:'例程', actions:['status','enable','disable'], desc:'管理当前根会话唯一的周期性主动检查。排班来自它服务的跟进事项；时间变化时重新绑定，单点时刻优先一次性提醒。', points:[['唯一绑定','启用新例程会替换旧绑定。'],['动态排班','默认有周期计划，可按实际跟进需求调整。'],['克制唤醒','唤醒后先读取上下文，无可行动变化时保持安静。'],['安全降级','没有 Schedule 服务时不注册此工具，其他能力照常。']] }
+    ];
+
+    const tabData = [
+      { id:'sources', label:'外部信号源', count:'3 项 · 2 开启', rows:[['行程邮件变化','mail.travel-changes · 用户指定','已启用','email travel changes'],['出行天气','weather.travel · 用户指定','已启用','weather forecast'],['会议变更提醒','calendar.meetings · 助理建议','默认关闭','calendar changes']] },
+      { id:'wakes', label:'唤醒清单', count:'2 项活跃', rows:[['上海返程落地确认','任务到点','今天 22:10','已安排'],['行程复核','例程','明天 08:30','已安排']] },
+      { id:'prefs', label:'偏好库', count:'3 条示例', rows:[['travel.seat','稳定偏好','靠窗 A / F','已确认'],['food.coffee','稳定偏好','拿铁，加奶不加糖','已确认'],['client.dining.alcohol','情景偏好','陪客户用餐不安排酒','情景覆盖']] },
+      { id:'favorites', label:'对话收藏夹', count:'3 条', rows:[['依据到达时间选择住宿区域','方法 · 5 星','已解析','知识已关联'],['客户会议纪要模板','模板 · 4 星','解析中…','队列 #1'],['报价对比表达方式','输出表达 · 3 星','待解析','仅问题与输出']] },
+      { id:'collections', label:'导入收藏夹', count:'1 组示例', rows:[['B 站项目研究资料','基础信息导入','整组提炼','知识已关联']] },
+      { id:'knowledge', label:'个人知识库', count:'12 类', rows:[['选择高铁的真实原因','决策','stated · 0.95','active'],['长会提前离场三次','观察','observed · 0.90','active'],['可能不喜欢长会','假设','inferred · 0.55','active']] }
+    ];
+
+    const scenarios = [
+      { name:'准备出差方案', nodes:[['CONTEXT','偏好与相关知识'],['DISCOVER','发现可用资源'],['EXECUTE','选择合适能力'],['VERIFY','核验候选方案'],['TASK','跟进审批']], result:'安全范围内先完成调研与草拟；真实预订前请求精确确认。' },
+      { name:'处理重要邮件', nodes:[['CONTEXT','人物与承诺'],['TOOL','邮箱读取'],['DRAFT','回复草案'],['TASK','等待审批'],['TOOL','确认后发送']], result:'可自动读取与草拟；发送前必须获得本次邮件的明确确认。' },
+      { name:'刷新市场价格', nodes:[['WORKFLOW','开始轨迹'],['TOOL','多源查询'],['PARALLEL','并行比较'],['VERIFY','独立复核'],['SKILL','候选执行序列']], result:'验证成功后记录资源序列，参数、报价与页面内容不进入 Skill。' },
+      { name:'到点主动关怀', nodes:[['WAKE','任务到点'],['CONTEXT','读取现状'],['SOURCE','检查已启用信号源'],['JUDGE','行动或推迟检查'],['REPORT','仅报告可行动变化']], result:'仅检查与当前事项相关的已启用来源；没有可行动变化时保持安静。' }
+    ];
+
+    let flowIndex = 0, autoTimer = null, toolIndex = 0, activeTab = 0, selectedStars = 4, selectedCategory = '过程决策', scenarioIndex = 0;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const $ = s => document.querySelector(s);
+    const $$ = s => [...document.querySelectorAll(s)];
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    function renderFlow(){
+      $('#stepList').innerHTML = flowSteps.map((s,i)=>`<button class="step ${i===flowIndex?'active':''}" data-i="${i}" ${i===flowIndex?'aria-current="step"':''}><span class="step-index">${i+1}</span><span><span class="step-title">${esc(s.title)}</span><span class="step-tool">${esc(s.tool)}</span></span></button>`).join('');
+      const s=flowSteps[flowIndex];
+      $('#stageContent').outerHTML=`<div class="stage-content" id="stageContent" aria-live="polite" aria-atomic="true"><div class="stage-kicker">${esc(s.kicker)}</div><h3>${esc(s.heading)}</h3><p>${esc(s.body)}</p><div class="stage-evidence"><header><span>本步可见证据</span><span>${flowIndex+1} / ${flowSteps.length}</span></header><div class="evidence-grid">${s.evidence.map(e=>`<div class="evidence-item">${esc(e)}</div>`).join('')}</div></div></div>`;
+      $('#flowProgress').style.width=`${((flowIndex+1)/flowSteps.length)*100}%`;
+      $('#flowProgressTrack').setAttribute('aria-valuenow', String(flowIndex+1));
+      $$('.step').forEach(b=>b.onclick=()=>{stopAuto();flowIndex=+b.dataset.i;renderFlow();});
+    }
+    function stopAuto(){if(autoTimer){clearInterval(autoTimer);autoTimer=null;$('#autoPlay').textContent='▶ 自动播放';$('#autoPlay').setAttribute('aria-pressed','false');}}
+    function startAuto(){stopAuto();flowIndex=0;renderFlow();$('#autoPlay').textContent='■ 停止播放';$('#autoPlay').setAttribute('aria-pressed','true');autoTimer=setInterval(()=>{if(flowIndex>=flowSteps.length-1){stopAuto();return;}flowIndex++;renderFlow();$('#autoPlay').textContent='■ 停止播放';$('#autoPlay').setAttribute('aria-pressed','true');},7000);}
+
+    function renderTools(){
+      $('#toolNav').innerHTML=tools.map((t,i)=>`<button class="tool-btn ${i===toolIndex?'active':''}" data-i="${i}" aria-pressed="${i===toolIndex}"><code>${esc(t.name)}</code><span>${esc(t.label)}</span></button>`).join('');
+      const t=tools[toolIndex];
+      $('#toolDetail').innerHTML=`<code>${esc(t.name)}</code><h3>${esc(t.label)}</h3><p>${esc(t.desc)}</p><div class="action-chips">${t.actions.map(a=>`<span class="chip">${esc(a)}</span>`).join('')}</div><div class="tool-points">${t.points.map(p=>`<div class="tool-point"><strong>${esc(p[0])}</strong><span>${esc(p[1])}</span></div>`).join('')}</div>`;
+      $$('.tool-btn').forEach(b=>b.onclick=()=>{toolIndex=+b.dataset.i;renderTools();});
+    }
+
+    function renderFavorite(){
+      $('#knowledgeOutput').classList.remove('done');
+      $('#parseDot').className='';$('#parseText').textContent='等待模拟解析';$('#parseBtn').textContent='模拟收藏并解析';
+      $('#stars').innerHTML=[1,2,3,4,5].map(n=>`<button class="star ${n<=selectedStars?'on':''}" data-n="${n}" aria-label="${n} 星" aria-pressed="${n===selectedStars}">★</button>`).join('');
+      const cats=['指令遵循','表达方式','结果输出','高频场景','过程决策','避坑纠错','偏好线索','灵光一现'];
+      $('#categories').innerHTML=cats.map(c=>`<button class="cat ${c===selectedCategory?'on':''}" data-cat="${c}" aria-pressed="${c===selectedCategory}">${c}</button>`).join('');
+      $$('.star').forEach(b=>b.onclick=()=>{selectedStars=+b.dataset.n;renderFavorite();});
+      $$('.cat').forEach(b=>b.onclick=()=>{selectedCategory=b.dataset.cat;renderFavorite();});
+      $('#koPriority').textContent=`${selectedStars} / 5`;
+      const processFocused=['指令遵循','高频场景','过程决策','避坑纠错','灵光一现'].includes(selectedCategory);
+      $('#koKind').textContent=processFocused?'Pattern · 方法模式':'Artifact · 产出物';
+      $('#koTitle').textContent=processFocused?'根据到达时刻选择住宿区域':'高质量行程方案输出范例';
+      $('#koContent').textContent=processFocused?'比较住宿方案时，综合考虑到达时刻、次日首个地点、交通缓冲与房价。':'保留最终方案的表达结构与信息组织，不推测未提供的执行过程。';
+    }
+    function runParse(){
+      const dot=$('#parseDot'), text=$('#parseText'), out=$('#knowledgeOutput'), btn=$('#parseBtn');
+      btn.disabled=true;$$('.star,.cat').forEach(b=>b.disabled=true);out.classList.remove('done');dot.className='working';text.textContent=`模拟收藏 ${selectedStars} 星 · ${selectedCategory}，进入解析队列`;
+      setTimeout(()=>text.textContent='模拟提炼：展示知识字段；实际插件同时支持偏好输出',700);
+      setTimeout(()=>{dot.className='done';text.textContent='模拟解析完成 · 未调用模型或写入实际知识库';out.classList.add('done');btn.disabled=false;$$('.star,.cat').forEach(b=>b.disabled=false);btn.textContent='重新演示解析';toast('模拟解析完成');},1900);
+    }
+
+    function renderTabs(){
+      $('#tabs').innerHTML=tabData.map((t,i)=>`<button class="tab ${i===activeTab?'active':''}" data-i="${i}" role="tab" aria-selected="${i===activeTab}" aria-controls="tabPanel">${t.label}</button>`).join('');
+      const t=tabData[activeTab];
+      $('#tabPanel').innerHTML=`<div class="panel-title"><h3>${t.label}</h3><span>${t.count}</span></div><div class="mock-list">${t.rows.map((r,idx)=>`<div class="mock-row"><div><strong>${esc(r[0])}</strong><small>${esc(r[1])}</small></div><div class="row-badges"><span class="row-badge ${idx===1?'gold':'green'}">${esc(r[2])}</span><span class="row-badge">${esc(r[3])}</span></div></div>`).join('')}</div>`;
+      $$('.tab').forEach(b=>b.onclick=()=>{activeTab=+b.dataset.i;renderTabs();});
+    }
+
+    function renderScenario(){
+      $('#scenarioButtons').innerHTML=scenarios.map((s,i)=>`<button class="scenario-btn ${i===scenarioIndex?'on':''}" data-i="${i}" aria-pressed="${i===scenarioIndex}">${esc(s.name)}</button>`).join('');
+      const s=scenarios[scenarioIndex];
+      $('#routeTrack').innerHTML=s.nodes.map(n=>`<div class="route-node"><strong>${esc(n[0])}</strong>${esc(n[1])}</div>`).join('');
+      $('#routeResult').textContent=s.result;
+      $$('.scenario-btn').forEach(b=>b.onclick=()=>{scenarioIndex=+b.dataset.i;renderScenario();});
+    }
+
+    function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
+    function beginDemo(){document.querySelector('#flow').scrollIntoView({behavior:reduceMotion?'auto':'smooth'});setTimeout(startAuto,reduceMotion?0:500);toast('动态流程开始播放');}
+
+    renderFlow();renderTools();renderFavorite();renderTabs();renderScenario();
+    $('#autoPlay').onclick=()=>autoTimer?stopAuto():startAuto();
+    $('#parseBtn').onclick=runParse;
+    $('#heroDemo').onclick=beginDemo;$('#navDemo').onclick=beginDemo;$('#replay').onclick=beginDemo;
+    window.addEventListener('keydown',e=>{if(document.activeElement?.closest('a,button,input,textarea,select,[contenteditable],[role="region"]'))return;if(e.key==='ArrowRight'){e.preventDefault();stopAuto();flowIndex=Math.min(flowSteps.length-1,flowIndex+1);renderFlow();}if(e.key==='ArrowLeft'){e.preventDefault();stopAuto();flowIndex=Math.max(0,flowIndex-1);renderFlow();}});
+    window.addEventListener('scroll',()=>$('#nav').classList.toggle('scrolled',scrollY>24));
+
+    const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}}),{threshold:.12});
+    $$('.reveal').forEach(el=>observer.observe(el));
+    const metricObserver=new IntersectionObserver(entries=>entries.forEach(e=>{if(!e.isIntersecting)return;e.target.querySelectorAll('[data-count]').forEach(el=>{const target=+el.dataset.count;let n=0;const inc=Math.max(1,Math.ceil(target/30));const timer=setInterval(()=>{n=Math.min(target,n+inc);el.textContent=n;if(n===target)clearInterval(timer);},35);});metricObserver.unobserve(e.target);}),{threshold:.35});
+    const metrics=$('.metrics');if(metrics)metricObserver.observe(metrics);
+  </script>
+</body>
+</html>

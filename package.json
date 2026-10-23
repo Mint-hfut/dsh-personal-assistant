@@ -1,0 +1,70 @@
+{
+  "name": "dsh-personal-assistant",
+  "version": "0.13.0",
+  "description": "A proactive, human-like personal-assistant kernel for DeepSeek Harness: personal knowledge, stable and situational guidance, follow-through tasks, adaptive check-ins, resource discovery, and reusable experience.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mint-hfut/dsh-personal-assistant.git"
+  },
+  "homepage": "https://mint-hfut.github.io/dsh-personal-assistant/SHOWCASE.zh.html",
+  "bugs": {
+    "url": "https://github.com/Mint-hfut/dsh-personal-assistant/issues"
+  },
+  "keywords": [
+    "deepseek-harness",
+    "dsh",
+    "dsh-plugin",
+    "personal-assistant",
+    "proactive-assistant",
+    "agent",
+    "preferences",
+    "personal-knowledge"
+  ],
+  "type": "module",
+  "main": "plugin.js",
+  "exports": {
+    ".": "./plugin.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "plugin.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "README.zh.md",
+    "DEMO.zh.md",
+    "SHOWCASE.zh.html",
+    "docs/showcase-preview.png",
+    "TEST-REPORT*.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "check": "node --check plugin.js && node --check client.js && node --test tests/*.test.js"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web"
+    }
+  },
+  "devDependencies": {
+    "@deepseek-ai/schemastery": "^3.18.4"
+  }
+}

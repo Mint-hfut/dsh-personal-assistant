@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Personal assistant icon">
+  <defs>
+    <linearGradient id="g" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5B8CFF"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="url(#g)"/>
+  <circle cx="32" cy="24" r="8" fill="white"/>
+  <path d="M17 48c1.8-9 7.1-14 15-14s13.2 5 15 14" fill="none" stroke="white" stroke-width="6" stroke-linecap="round"/>
+  <path d="M47 13v9M42.5 17.5h9" stroke="#FDE68A" stroke-width="3" stroke-linecap="round"/>
+</svg>
