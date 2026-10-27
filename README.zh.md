@@ -102,7 +102,7 @@ dsh plugin --profile web remove dsh-personal-assistant
 
 可运行的演示脚本见 [DEMO.zh.md](DEMO.zh.md)。
 
-v0.10.0 的个人知识库验证报告见 [TEST-REPORT-v0.10.0.zh.md](TEST-REPORT-v0.10.0.zh.md)。合并版运行 `npm run check` 可检查本地 v6 与同事 v7 数据迁移、B 站导入、编辑或重载后的过期解析结果拦截、落盘失败后的提醒恢复，以及 1000 条收藏满额时的编辑。自动化测试使用模拟网络和模型响应；真实宿主操作与知识质量仍需验收。
+0.13.0 的测试结果见[插件功能测试报告](dsh-personal-assistant-插件功能测试报告.md)和[兼容性测试报告](dsh-personal-assistant-兼容性测试报告.md)。运行 `npm run check` 可执行自动化回归测试；真实宿主验证与未覆盖范围详见报告。
 
 ## 配置
 

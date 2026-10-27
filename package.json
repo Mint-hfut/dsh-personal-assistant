@@ -41,7 +41,8 @@
     "DEMO.zh.md",
     "SHOWCASE.zh.html",
     "docs/showcase-preview.png",
-    "TEST-REPORT*.md",
+    "dsh-personal-assistant-插件功能测试报告.md",
+    "dsh-personal-assistant-兼容性测试报告.md",
     "LICENSE"
   ],
   "scripts": {

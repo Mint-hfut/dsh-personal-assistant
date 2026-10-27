@@ -102,7 +102,7 @@ There are no commands to memorize. Talk to the assistant.
 
 A runnable demo script lives in [DEMO.zh.md](DEMO.zh.md) (Chinese).
 
-The v0.10.0 personal-knowledge report lives in [TEST-REPORT-v0.10.0.md](TEST-REPORT-v0.10.0.md) ([Chinese](TEST-REPORT-v0.10.0.zh.md)). Run `npm run check` for the regression suite, including local v6 and colleague v7 state migration, Bilibili import, stale parse results after editing or reloading, reminder recovery after persistence errors, and editing favorites at the 1000-record limit. Network and model calls in these tests use fixtures; live host behavior and knowledge quality still need acceptance testing.
+The [plugin functionality test report](dsh-personal-assistant-插件功能测试报告.md) and [compatibility test report](dsh-personal-assistant-兼容性测试报告.md) document the 0.13.0 checks (Chinese). Run `npm run check` for the automated regression suite. The reports describe the tested host behavior and remaining coverage limits.
 
 ## Configuration
 
